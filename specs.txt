@@ -1,0 +1,195 @@
+keywords:
+    - func - function declaration initiator
+
+    - halt - immediately ends execution
+    - raise - raises an error
+
+    - try - opens a try block
+    - catch - opens a catch block
+    - final - opens a final block
+    
+    - if - opens an if statement
+    - else - opens an else statement
+
+    - for - opens a for loop
+    - while - opens a while loop
+    - in - comparason, alternately - for in loops
+
+    - class - class declaration initiator
+
+    - var - variable declaration
+
+    - import - library import
+    - from - used in combination with import
+    - as - used in combination with import, alternately - type casting
+
+    - enum - enum declaration initiator
+
+types:
+    - (function) annotated as (Type, Type) -> Type
+    - list
+    - dict
+    - str
+    - int
+    - float
+    - number
+    - bool
+    - any
+    - void
+
+typing:
+    typing will be optional but when present will be enforced
+
+    multiple types can be assigned to a variable when seperated by "|"
+
+    typing contents of lists and dicts will be done with "<Type>" and "<Type, Type>" respectively
+
+    the contents of lists and dicts may be untyped even if the variable is typed as a list or dict
+    
+    ```
+    // basic stuff
+    var x = "";
+    x = 0;
+    // valid as "x" is not typed and is therefore given a dynamic type
+    var y : str = "";
+    y = 0;
+    // invalid as "y" is typed as a string and cannot be re-typed
+    var z : str|int = "";
+    z = 0;
+    // valid as "z" is typed to allow both strings and integers to be stored in it
+    z = true; // fails as "z" is not set to allow boolean values
+
+    // lists and dicts
+    var l1 : list = [];
+    l1.push("x");
+    l1.push(0);
+    // valid as "l1" is typed only as a list and the contents are not specified
+    var l2 : list<any> = [];
+    l2.push("x"); // valid
+    l2.push(0); // when contents are typed as "any" the first type to be stored in the container becomes the only type allowed from that point on
+
+    var d1 : dict = {};
+    d1["x"] = 0;
+    d1[0] = "x";
+    // valid as the contents of "d1" are not typed
+    var d2 : dict<str> = {};
+    d2["x"] = 0;
+    d2["y"] = "z"; // valid as only the keys of "d2" are typed
+    d2[0] = "x"; // fails as the keys of "d2" must be strings
+    
+    // when a container has it's contents typed as "void" the type is ignored, this allows you to only type a dictionaries values while leaving keys to be anything
+    var d3 : dict<void, str> = {};
+    d3["x"] = "y";
+    d3[0] = "z"; // valid as the keys of "d3" are not typed
+    d3[true] = false; // fails as the values of "d3" are typed to only accept strings
+
+    var d4 : dict<str, int> = {};
+    d4["x"] = 0; // works as expected
+    d4[0] = 0; // fails
+    d4["y"] = "x"; // fails
+    d4[0] = "z"; // fails
+    ```
+
+typing - restrictions:
+    restrictions can be imposed upon the values of certain types when typing
+
+    note that not all types can have restrictions, for example the "bool" type, any restriction on it would be the same as just making it constant and therefore are not useful
+
+    restrictions are placed within parentheses directly after the type ex: number(), string()
+
+    availibility:
+        number : (low, high) - each are optional but at least one must be present, when low is present the number cannot be below it, when high is present the number cannot be above it, the comma is required ex: number(,high) number(low,) number(low,high)
+
+        string : (value *[|value]) - the string stored in the variable must be equal to a "value", a warning is emitted if there are repetitions
+
+built in functions:
+    - pow : {(n : number, power : number) -> number} returns "n" raised to the power of "power"
+    - sqrt : {(n : number) -> number} returns the quare root of "n"
+    - floor : {(n : number) -> int} returns "n" rounded down
+    - ceil : {(n : number) -> int} returns "n" rounded up
+    - round : {(n : number, places : int(0,) = 0) -> number} returns "n" rounded to "places" decimal digits
+
+built in objects:
+    console:
+        - log : {(*items) -> void} logs every item in "items" to the console using the default color
+        - warn : {(*items) -> void} logs every item in "items" to the console using the warning color
+        - err : {(*items) -> void} logs every item in "items" to the console using the error color
+        - good : {(*items) -> void} logs every item in "items" to the console using the good color
+
+        - readline : {() -> str} returns a string obtained from input to stdin
+        - read : {(characters : int(-1,) = -1) -> str} returns the next "characters" characters from stdin, blocks if there aren't enough characters remaining, if "characters" is less than zero returns all remaining characters from stdin without blocking
+
+built in libraries:
+    json:
+        # note that stringify will not work on custom types
+        - stringify : {(data) -> str} stringifies data into a JSON format
+        - parse : {(string : str) -> any} parses a JSON string into an object
+    
+    random:
+        - seed : {(seed : int = 0) -> void} seeds the generator
+        - random : {() -> float} returns a float from 0 (inclusive) to 1 (exclusive)
+        - randint : {(low : number, high : number, step : number = 1) -> int} returns an integer between "low" (inclusive) and "high" (inclusive) at "step" intervals, performs a floor operation on all arguments before they are used
+        - randrange : {(low : number, high : number, step : number = 1) -> number} returns a number between "low" (inclusive) and "high" (exclusive) at "step" intervals
+        - shuffle : {(l : list) -> void} shuffles list "l" in place
+        - choice : {(l : list) -> any} returns a random item from list "l"
+    
+    fs:
+        - open : {(path : str, mode : str, encoding : int(0,1) = 0) -> fs.File} returns a File object
+        - writeFile : {(path : str, contents : str|list<int(0,255)>) -> void} replaces the contents of the specified file with "contents", creates a new file if it doesn't already exist
+        - readFile : {(path : str, encoding : int(0,1) = 0) -> str|list<int(0,255)>} reads the contents of the specified file
+        - delFile : {(path : str) -> void} deletes the specified file, throws if the operation fails
+        - mkDir : {(path : str) -> void} creates a directory with the specified path, throws if the operation fails
+        - rmDir : {(path : str) -> void} deletes the specified directory and all its contents, throws if the operation fails
+
+        File:
+            - name : {str} file name and extension
+            - path : {str} path to file
+            - ext : {str} file extension
+            
+            - read : {(n : int(-1,) = -1) -> str|list<int(0,255)>} reads the specified number of characters/bytes from the file
+            - write : {(data : str|list<int(0,255)>) -> void} writes the given data to the file
+            - seek : {(pos : int = 0, anchor : int(0,2) = 0) -> int} seeks to the given position relative to the given anchor, returns the new position relative to the begining of the file
+            - tell : {() -> int} returns the position relative to the begining of the file
+
+            - truncate : {(count : int(0,) = 0) -> void} truncates the file to the given number of characters/bytes
+
+            - flush : {() -> void} flushes the file
+            - close : {() -> void} closes and flushes the file
+
+errors:
+    - errors are raised when either the "halt" or "raise" keyword is encountered
+
+    - when "halt" is encountered an un-catchable error is raised causing the program to stop execution and print a stack trace
+
+    - when "raise" is encountered a catchable error is raised which can be used to signal a recoverable error, note: if "raise" raises an error inheriting from "NoCatch" then the error cannot be caught
+
+    errors can be handled with "try, catch, final" statements, a "final" block is optional but the others are mandatory
+
+    ```
+    try {
+        raise Error("Uh Oh");
+    } catch (error : Error) {
+        console.log(error);
+    } final (error : Error|void) {
+        raise error;
+    }
+    // logs then raises
+
+    try {
+        raise ValueError("Uh Oh");
+    } catch (error : Error(Error)) {
+        console.log(error);
+    } final (error : Error|void) {
+        raise error;
+    }
+    // only raises
+
+    try {
+        halt; // alternately: "raise NoCatch("Uh Oh")";
+    } catch (error : Error) {
+        console.log("HI"); // never runs
+    } final {
+        console.log("error"); // never runs
+    }
+    // only halt will run, the error is then propagated through the try block without being handled, it will continue to move up until it reaches the top and execution halts
+    ```
