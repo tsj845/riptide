@@ -5,9 +5,11 @@ pub enum TokenData {
     String(String),
     List(Vec<Token>),
     Dict(HashMap<String, Token>),
-    Number(i64),
+    Int(i64),
     Float(f64),
-    Null
+    Bool(bool),
+    Function((Vec<Token>, Vec<Token>)),
+    Void
 }
 
 pub struct Token {

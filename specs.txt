@@ -1,5 +1,9 @@
+general syntax:
+    every line is ended with a ";" or one of "{" or "}" in the cases of a block opening or closing
+
 keywords:
     - func - function declaration initiator
+    - return - function retrun statement
 
     - halt - immediately ends execution
     - raise - raises an error
@@ -16,6 +20,8 @@ keywords:
     - in - comparason, alternately - for in loops
 
     - class - class declaration initiator
+    - static - marks methods and properties as static class members
+    - private - marks a member as private
 
     - var - variable declaration
 
@@ -25,6 +31,8 @@ keywords:
 
     - enum - enum declaration initiator
 
+    - undefined - gets the special built-in "undefined"
+
 types:
     - (function) annotated as (Type, Type) -> Type
     - list
@@ -32,10 +40,13 @@ types:
     - str
     - int
     - float
-    - number
+    - number (acts as shorthand for int|float)
     - bool
     - any
     - void
+
+common methods:
+    - toString : {() -> str} returns a string representation of the object, all types have this, custom types get an auto-implemented version that returns "[classname]" so if you plan to be using "toString" on custom types it's best to implement it yourself
 
 typing:
     typing will be optional but when present will be enforced
@@ -90,6 +101,9 @@ typing:
     d4[0] = "z"; // fails
     ```
 
+special built-ins:
+    - undefined - matches any type and is used as a placeholder for uninitiallized values
+
 typing - restrictions:
     restrictions can be imposed upon the values of certain types when typing
 
@@ -121,9 +135,11 @@ built in objects:
 
 built in libraries:
     json:
-        # note that stringify will not work on custom types
+        # note that while stringify will work on custom types when parse is used on the stringified object a plain "dict" will be returned
         - stringify : {(data) -> str} stringifies data into a JSON format
         - parse : {(string : str) -> any} parses a JSON string into an object
+
+        //
     
     random:
         - seed : {(seed : int = 0) -> void} seeds the generator
@@ -193,3 +209,118 @@ errors:
     }
     // only halt will run, the error is then propagated through the try block without being handled, it will continue to move up until it reaches the top and execution halts
     ```
+
+functions:
+    declared using "func [name] (*args, **kwargs) -> Type {}"
+
+    the return value must always be typed
+
+    ```
+    func myfunc () -> void {
+        console.log("Hello, World!");
+    }
+
+    func plus2 (n : number) -> number {
+        return n + 2;
+    }
+
+    func concat (s1 : str, s2 : str) -> str {
+        return s1 + s2;
+    }
+
+    func with_defaults (a : number = 3, b : number = 4, c : number = 5) -> bool {
+        return sqrt(a * a + b * b) == c;
+    }
+
+    console.log(with_defaults(b = 5)); // false
+    ```
+
+lists:
+    declared with "[]"
+
+    list items are seperated by ","
+
+    may span multiple lines
+
+    if an extra comma is present after the last item then it's ignored
+
+    ```
+    var l : list = [0, 2, 1, 4];
+
+    var l2 : list = [
+        0,
+        2,
+        1,
+        4,
+    ];
+    ```
+
+    methods:
+        for "list" with type "list<T>"
+        - push : {(item : T) -> void} pushes one or more items
+        - pop : {() -> T} removes the last item and returns it, returns "undefined" if list is empty
+        - insert : {(item : T, index : int(0,)) -> void} inserts the given item at the given index, throws if the index is out of bounds
+        - remove : {(index : (0,)) -> T} removes and returns the item at the specified index, throws if the index is out of bounds
+
+        - join : {(sep : str) -> str} returns all list items as strings joined by "sep", any non-string items are converted to strings using the common "toString" method
+
+        - sort : {(f : (item : T, next : T) -> bool) -> void} sorts the list in place
+
+        # note that the following are hidden methods called using syntacic sugar
+        - __get : {(index : int) -> T} returns the item at index "index" when less than zero the index is interpreted as an offset from the end of the list, throws if out of bounds
+        - __set : {(index : int, value : T) -> void} sets the value of the item at index "index" to "value" when less than zero the index is interpreted as an offset from the end of the list, throws if out of bounds
+
+dicts:
+    declared with "{}"
+
+    items seperated by ","
+
+    key value pairs seperated by ":"
+
+    may span multiple lines
+
+    if an extra comma is present after the last item then it's ignored
+
+    ```
+    var d : dict = {0 : "1", "2" : 3};
+
+    var d2 : dict = {
+        0 : "1",
+        "2" : 3,
+    }
+    ```
+
+    methods:
+        for "dict" with type "dict<K, V>"
+        - insert : {(key : K, value : V) -> void} adds "key" and "value" as a key value pair
+        - remove : {(key : K) -> void} removes the key value pair with "key" as the key
+
+        # note that the following are hidden methods called using syntacic sugar
+        - __get : {(key : K) -> V} gets the value of key "key"
+        - __set : {(key : K, value : V) -> void} acts in the same way that insert does
+        ```
+        var d : dict = {};
+
+        d["a"] = 1; // syntacic sugar for "__set"
+        
+        console.log(d["a"]); // 1; syntacic sugar for "__get"
+        ```
+
+strings:
+    declared with '"string"'
+
+    concatenation : "string" + "other"
+    repetition : "string" * count
+
+    methods:
+        - toString : {() -> str} returns the string
+        
+        - split : {(sep : str) -> list<str>} returns the string as a list of items seperated by "sep"
+
+        # note that the following methods are hidden and called using syntacic sugar
+        - __get : {(index : int) -> str} returns the character at index "index", when less than zero "index" is interpreted as an offset from the end of the string, throws if out of bounds
+        - __add : {(other : str) -> str} string concatenation
+        - __mul : {(count : int(0,)) -> str} string repetition, returns "" if "count" is zero
+
+classes:
+    declared with "class ClassName : *Inheriting {}"
