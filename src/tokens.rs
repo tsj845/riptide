@@ -1,6 +1,11 @@
 // defines tokens
 use std::collections::HashMap;
 
+/**
+ * Token is used when a token could be pulled from TokenData
+ * otherwise TokenData is used
+ */
+
 pub enum TokenData {
     String(String),
     List(Vec<Token>),
@@ -8,7 +13,12 @@ pub enum TokenData {
     Int(i64),
     Float(f64),
     Bool(bool),
-    Function((Vec<Token>, Vec<Token>)),
+    // args, return type, code
+    Function((Vec<TokenData::Pair>, TokenData, Vec<Token>)),
+    // name, statics, instance
+    Class((String, HashMap<String, Token>, HashMap<String, Token>)),
+    // name, type, default
+    Pair((String, TokenData, TokenData)),
     Void
 }
 
