@@ -22,6 +22,7 @@ keywords:
     - class - class declaration initiator
     - static - marks methods and properties as static class members
     - private - marks a member as private
+    - readonly - marks a class member as immutable
 
     - var - variable declaration
 
@@ -324,3 +325,52 @@ strings:
 
 classes:
     declared with "class ClassName : *Inheriting {}"
+
+    methods are declared in the same way as functions within the class body
+
+    create a "__init__" method to allow for construction, "__init__" MUST return "void"
+
+    fields are always declared directly in the class body
+
+    any static members are marked with the "static" keyword
+
+    any private members are marked with the "private" keyword
+
+    any immutable members are marked with the "readonly" keyword, readonly methods are not allowed to change any data within the class
+
+    "readonly" always precedes "private" which always precedes "static"
+
+    ```
+    class Base {
+        readonly static name : str = "base class";
+        
+        private mutable : int = 0;
+
+        private static ps : bool = false;
+
+        func hello () -> void {
+            console.log("Hello, World!");
+        }
+    }
+
+    class Child : Base {
+        func __init__ () -> void {
+            self.hello(); // Base.hello
+            console.log(self.mutable); // 0
+            console.log(Base.ps); // Error
+            console.log(Child.ps); // false
+
+            self.method();
+
+            Child.method(); // I'm a static method!
+        }
+
+        readonly func method () -> void {
+            self.mutable = 1; // Error
+        }
+
+        static func method () -> void {
+            console.log("I'm a static method!");
+        }
+    }
+    ```
