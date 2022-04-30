@@ -1,0 +1,20 @@
+token types:
+    KEY - keywords
+    OPS - operators
+    CTL - control flow
+    DAT - data
+    REF - reference
+    PTR - pointer
+
+token data:
+    Name - a name of some kind
+    String - a string value
+    Int - integer
+    Float - float
+    Bool - bool
+    List - list
+    Dict - dict
+    Class - class
+    Function - function
+    Pair - contains argument data
+    Void - contains no data

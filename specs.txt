@@ -1,5 +1,6 @@
 general syntax:
     every line is ended with a ";" or one of "{" or "}" in the cases of a block opening or closing
+    comments are single line with "//"
 
 keywords:
     - func - function declaration initiator
@@ -23,6 +24,7 @@ keywords:
     - static - marks methods and properties as static class members
     - private - marks a member as private
     - readonly - marks a class member as immutable
+    - self - used to reference the instance of the class running the code
 
     - var - variable declaration
 
@@ -34,6 +36,50 @@ keywords:
 
     - undefined - gets the special built-in "undefined"
 
+operators:
+    *   multiplication / repetition
+    /   division
+    +   addition / concatenation
+    -   subtraction
+    %   modulo
+    !   logical not / bitwise inversion
+    ^   bitwise xor
+    |   bitwise or
+    &   bitwise and
+    <   less than
+    >   greater than
+    ~   similar, loose equality eg. "'0' == 0; // false", "'1' ~ 1; // true"
+    =   assignment operator
+    ==  equal
+    !=  not equal
+    <=  less than or equal
+    >=  greater than or equal
+    &&  logical and
+    ||  logical or
+    **  exponentiation
+
+    operators with assignment versions e.g. "+=":
+        +
+        -
+        *
+        /
+        %
+
+other symbols:
+    : - typing / key value pair seperator
+    . - invokes the dot syntax
+    $ - deref see "variable scheme" for details
+
+variable scheme:
+    by default when passing variables around the variable reference itself is passed
+    
+    to pass the underlying values of variables you must deref them
+
+    to deref a variable you put $ in front of it eg. "return $x"
+
+    there are scenarios in which variables are implicitly derefed, these include:
+        - mathmatical and logical operations
+
 types:
     - (function) annotated as (Type, Type) -> Type
     - list
@@ -41,7 +87,8 @@ types:
     - str
     - int
     - float
-    - number (acts as shorthand for int|float)
+    - uint
+    - number (acts as shorthand for int|float|uint)
     - bool
     - any
     - void
@@ -75,10 +122,7 @@ typing:
     var l1 : list = [];
     l1.push("x");
     l1.push(0);
-    // valid as "l1" is typed only as a list and the contents are not specified
-    var l2 : list<any> = [];
-    l2.push("x"); // valid
-    l2.push(0); // when contents are typed as "any" the first type to be stored in the container becomes the only type allowed from that point on
+    // valid as "l1" is typed only as a list and the contents are not specified would also work with "list<any>"
 
     var d1 : dict = {};
     d1["x"] = 0;
@@ -89,8 +133,8 @@ typing:
     d2["y"] = "z"; // valid as only the keys of "d2" are typed
     d2[0] = "x"; // fails as the keys of "d2" must be strings
     
-    // when a container has it's contents typed as "void" the type is ignored, this allows you to only type a dictionaries values while leaving keys to be anything
-    var d3 : dict<void, str> = {};
+    // when a container has it's contents typed as "any" the type is ignored, this allows you to only type a dictionaries values while leaving keys to be anything
+    var d3 : dict<any, str> = {};
     d3["x"] = "y";
     d3[0] = "z"; // valid as the keys of "d3" are not typed
     d3[true] = false; // fails as the values of "d3" are typed to only accept strings
@@ -104,6 +148,26 @@ typing:
 
 special built-ins:
     - undefined - matches any type and is used as a placeholder for uninitiallized values
+
+markers:
+    markers provide instructions on more complicated tasks
+
+    list:
+        @inherits - see "classes" for details
+        @wraps - helper to create decorators
+
+    ```
+    // decorator example
+    func decorates (f : () -> any) -> (*, **) -> any {
+        func inner (*a, **b) -> any {
+            console.log("before");
+            var r = f(*a, **b);
+            console.log("after");
+            return $r;
+        }
+        return $f;
+    }
+    ```
 
 typing - restrictions:
     restrictions can be imposed upon the values of certain types when typing
@@ -340,6 +404,8 @@ classes:
 
     "readonly" always precedes "private" which always precedes "static"
 
+    members are accessed with the dot syntax "."
+
     ```
     class Base {
         readonly static name : str = "base class";
@@ -374,3 +440,50 @@ classes:
         }
     }
     ```
+
+    use the "@inherits" marker to inherit only specific things from a parent
+
+    ```
+    class A {
+        x;
+        y = 0;
+        z = "";
+    }
+    class B {
+        @inherits x from A;
+        func __init__ (v) -> void {
+            self.x = v;
+            console.log(self.x); // v
+            console.log(self.y); // error
+        }
+    }
+    class C {
+        @inherits x, y from A;
+        func __init__ (v) -> void {
+            self.x = v;
+            console.log(self.x); // v
+            console.log(self.y); // 0
+            console.log(self.z); // error
+        }
+    }
+    ```
+
+defining support for operators:
+    any class can have support for operators and certain keywords by declaring the appropriate methods
+
+    *   __mul
+    +   __add
+    -   __sub
+    /   __div
+    %   __mod
+    ^   __xor
+    &   __bnd
+    |   __bor
+    <   __lt
+    >   __gt
+    ~   __sim
+    &&  __lnd
+    ||  __lor
+    ==  __eq (also adds support for !=)
+    <=  __le
+    >=  __ge

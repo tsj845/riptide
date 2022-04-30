@@ -1,0 +1,1 @@
+printf "\x1bc" && cargo build

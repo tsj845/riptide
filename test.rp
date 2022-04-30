@@ -1,0 +1,17 @@
+true;false;
+func;
+
+func f (state : int) -> str|int {
+    if state == 0 {
+        return 0;
+    } else {
+        return "x";
+    }
+}
+
+var s : int = 0;
+if s == 0 {
+    var y : int = f(state);
+} else {
+    var y : str = f(state);
+}
