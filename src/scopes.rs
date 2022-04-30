@@ -104,13 +104,13 @@ impl ScopeManager {
     }
     pub fn flag (&mut self, name : &str, target : Flags, value : bool) {
         let mut f : Flag = self.get_flag(name);
-        println!("FB: {}, {}", f.bits(), f.valid());
+        // println!("FB: {}, {}", f.bits(), f.valid());
         if f.valid() {
             let log : bool = f.matches(Flags::Global, true);
             f.set(target, value);
             let v = self.scopes[match log {true => 0, _ => self.scope_count-1}].get_mut(name).unwrap();
             v.1 = f;
-            println!("{}, {}", f.bits(), v.1.bits());
+            // println!("{}, {}", f.bits(), v.1.bits());
         }
     }
     pub fn get (&self, name : String) -> Token {

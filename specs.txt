@@ -182,7 +182,7 @@ typing - restrictions:
         string : (value *[|value]) - the string stored in the variable must be equal to a "value", a warning is emitted if there are repetitions
 
 built in functions:
-    - pow : {(n : number, power : number) -> number} returns "n" raised to the power of "power"
+    - pow : {(n : number, power : number) -> number} returns "n" raised to the power of "power" (UNSURE)
     - sqrt : {(n : number) -> number} returns the quare root of "n"
     - floor : {(n : number) -> int} returns "n" rounded down
     - ceil : {(n : number) -> int} returns "n" rounded up

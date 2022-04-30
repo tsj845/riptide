@@ -29,7 +29,9 @@ pub enum TokenData {
     Class(String, HashMap<String, Token>, HashMap<String, Token>),
     // name, type, default
     Pair(String, Box<TokenData>, Box<TokenData>),
-    Void
+    Void,
+    // error
+    Error(String)
 }
 
 pub fn void_data () -> TokenData {
@@ -90,7 +92,8 @@ impl TokenData {
         match self {
             TokenData::Dict(d,t) => {
                 if test == t || test == "dict<any,any>" {return true;}
-                let types : Vec<&str> = test[5..test.len()-1].split(",").collect();
+                let mut depth : usize = 0;
+                let types : Vec<&str> = test[5..test.len()-1].split(|c : char| {if c==','&& depth==0{return true;}if c=='('||c=='<'{depth+=1;}if c==')'||c=='>'{depth-=1;}return false;}).collect();
                 for (key, value) in d {
                     if !(TokenData::match_type_str(key, types[0]) && value.value.match_type(types[1])) {
                         return false;
@@ -101,14 +104,25 @@ impl TokenData {
             _ => {return false;}
         };
     }
+    pub fn match_constraint (&self, test : &str) -> bool {
+        if test.starts_with("str") {
+            return match self {
+                //.collect::<Vec<_>>().iter()
+                TokenData::String(s) => test[4..test.len()-1].split("|").find(|item:&&str|{item==s}).is_some(),
+                _ => false,
+            };
+        }
+        println!("catchall");
+        return false;
+    }
     pub fn match_type (&self, test : &str) -> bool {
         if test == "any" {
             return true;
         }
         let mut depth : usize = 0;
-        if test.find(|c : char| {if c == '|' && depth == 0 {return true} if c == '<' {depth += 1} if c == '>' {depth -= 1} return false;}).is_some() {
+        if test.find(|c : char| {if c == '|' && depth == 0 {return true} if c == '<' || c == '(' {depth += 1} if c == '>' || c == ')' {depth -= 1} return false;}).is_some() {
             depth = 0;
-            for l in test.split(|c : char| {if c == '|' && depth == 0 {return true} if c == '<' {depth += 1} if c == '>' {depth -= 1} return false;}) {
+            for l in test.split(|c : char| {if c == '|' || c == '(' && depth == 0 {return true} if c == '<' || c == ')' {depth += 1} if c == '>' {depth -= 1} return false;}) {
                 println!("{}", l);
                 if self.match_type(l) {
                     return true;
@@ -120,7 +134,7 @@ impl TokenData {
             TokenData::List(_,_) => self.match_list_type(test),
             TokenData::Dict(_,_) => self.match_dict_type(test),
             TokenData::Bool(_) => test == "bool",
-            TokenData::String(_) => test == "str",
+            TokenData::String(_) => test == "str" && self.match_constraint(test),
             TokenData::Int(_) => test == "int" || test == "number",
             TokenData::UInt(_) => test == "uint" || test == "number",
             TokenData::Float(_) => test == "float" || test == "number",
@@ -128,8 +142,17 @@ impl TokenData {
             TokenData::Pair(_, _, _) => false,
             TokenData::Function(_, _, _) => self.match_func_type(test),
             TokenData::Class(s, _, _) => test == s,
-            TokenData::Void => test == "void"
+            TokenData::Error(_) => false, 
+            TokenData::Void => test == "void",
         }
+    }
+}
+
+pub struct TypeEnforcer {}
+
+impl TypeEnforcer {
+    pub fn validate (data : (bool, u64, Vec<&str>)) -> bool {
+        return true;
     }
 }
 
@@ -231,7 +254,8 @@ impl fmt::Display for TokenData {
             TokenData::Float(f) => f.to_string(),
             TokenData::String(s) => s.to_string(),
             TokenData::Name(n) => n.to_string(),
-            TokenData::UInt(u) => u.to_string()
+            TokenData::UInt(u) => u.to_string(),
+            TokenData::Error(s) => s.to_string(),
         };
         write!(f, "{}", v)
     }

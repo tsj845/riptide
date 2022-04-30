@@ -15,7 +15,9 @@ fn start (tokens : Vec<Token>) {
 fn test_1 () {
     let mut t = Token::new(DAT, 0, TokenData::list_new(Vec::new()));
     t.list_push(Token::new(DAT, 0, TokenData::Bool(true)));
-    println!("{}, {}", t.value.match_type("list<any>"), t.value.match_type("list<str|bool>"));
+    let s = TokenData::String("x".to_owned());
+    println!("{}", s.match_constraint("str(xyz)"));
+    // println!("{}, {}", t.value.match_type("list<any>"), t.value.match_type("list<str|bool>"));
 }
 
 pub fn run (args : Vec<String>) {
