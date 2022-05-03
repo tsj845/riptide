@@ -15,3 +15,8 @@ if s == 0 {
 } else {
     var y : str = f(state);
 }
+
+"verylongstringnameiguessdefmorethantweentycharactersforsure"
+var t = "0";
+t.is_digit();
+[]

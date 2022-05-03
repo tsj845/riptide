@@ -3,18 +3,20 @@ use crate::tokens::*;
 #[allow(unused_imports)]
 use crate::tokenizer::{tokenize, tokenize_file};
 use crate::runner::Runner;
-use crate::statics::DAT;
+use crate::statics::*;
 
 
 fn start (tokens : Vec<Token>) {
     let mut runner : Runner = Runner::new();
 
+    // println!("{}", match runner.do_op(Token::new(DAT, TokenData::Int(10)), Token::new(OPS, TokenData::String("-".to_owned())), Token::new(DAT, TokenData::UInt(20))) {Ok(v) => v, Err(s)=>{println!("{}",s);void_token()}});
+
     println!("{}", match runner.run(tokens) {Ok(msg) => msg,Err(msg) => msg});
 }
 
 fn test_1 () {
-    let mut t = Token::new(DAT, 0, TokenData::list_new(Vec::new()));
-    t.list_push(Token::new(DAT, 0, TokenData::Bool(true)));
+    let mut t = Token::new(DAT, TokenData::List(Vec::new()));
+    t.list_push(Token::new(DAT, TokenData::Bool(true)));
     let s = TokenData::String("x".to_owned());
     println!("{}", s.match_constraint("str(xyz)"));
     // println!("{}, {}", t.value.match_type("list<any>"), t.value.match_type("list<str|bool>"));

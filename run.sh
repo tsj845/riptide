@@ -1,1 +1,1 @@
-printf "\x1bc" && cargo run "test.rp"
+printf "\x1bc" && cargo run ${1:-test}".rp"

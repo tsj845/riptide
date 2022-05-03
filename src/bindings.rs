@@ -1,5 +1,6 @@
 use crate::tokens::*;
 use crate::statics::*;
+use crate::scopes::*;
 
 // built in bindings
 
@@ -54,9 +55,28 @@ impl FuncBindings {
     }
 }
 
+pub struct OpBindings {}
+
+impl OpBindings {
+    pub fn execute (&self, opid : &str, args : &Vec<String>, data : &mut ScopeManager) -> Token {
+        let dummyvec : Option<&Vec<Token>> = None;
+        // data.dump();
+        if opid == "console.log" {
+            // println!("{}", data.deref_full(&args[0]));
+            for item in match &data.deref_full(&args[0]).value {TokenData::List(l)=>&l,_=>dummyvec.unwrap()} {
+                print!("{}, ", item);
+            }
+            print!("\n");
+            return void_token();
+        }
+        return void_token();
+    }
+}
+
 pub struct Builtins {
     pub methods : MethodBindings,
     pub funcs : FuncBindings,
+    pub operations : OpBindings,
 }
 
 impl Builtins {
@@ -64,6 +84,7 @@ impl Builtins {
         Builtins {
             methods : MethodBindings::new(),
             funcs : FuncBindings::new(),
+            operations : OpBindings {},
         }
     }
 }

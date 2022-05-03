@@ -1,0 +1,2 @@
+global readonly var x = 100;
+local var x = 1;
